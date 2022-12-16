@@ -1,0 +1,50 @@
+import csv
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import pandas as pd
+import matplotlib.pyplot as plt
+import  numpy as np
+
+website = urlopen ("https://en.wikipedia.org/wiki/Mass_shootings_in_the_United_States")
+soup = BeautifulSoup(website, "html.parser")
+table = soup.findAll("table", {"class":"wikitable"})[0]
+rows = table.findAll("tr")
+with open("massshootingintheUS.csv", "wt+", newline="") as f:
+    writer = csv.writer(f)
+    for i in rows:
+        row = []
+        for cell in i.findAll(["td", "th"]):
+            row.append(cell.get_text())
+        writer.writerow(row)
+
+
+data = pd.read_csv("massshootingintheUS.csv")
+data.head()
+
+df = pd.read_csv("massshootingintheUS.csv", usecols=['Year', 'Deaths']) #retreive 2 specific column by name
+
+year = list(df['Year']) #convert cvs file column into list
+deaths = list(df['Deaths']) #convert cvs file column into list
+
+df['Deaths'] = df['Deaths'].str.extract(r'(\d+)', expand=False) #remove anything but interger in a column
+
+deaths_chronologicalorder =  df['Deaths'].str.replace('%', '').astype(int) #chronological order for the deaths
+
+#print(deaths_chronologicorder)
+
+
+
+#print(df['Deaths'])
+
+plt.title('Mass shootings in America',fontsize=30) 
+plt.xlabel('Year',fontsize=15)
+plt.ylabel('Deaths',fontsize=15)  # to name Y label
+plt.bar(year,deaths_chronologicalorder, width=10, linewidth= 5, color= 'red')
+plt.legend
+axes = plt.gca() #draw horizontal line
+axes.yaxis.grid() #draw horizontal line still
+
+plt.savefig('plot.png')
+
+
+plt.show()
